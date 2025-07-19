@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hardcore Clicker Challenge + Ultra Fast Autoclicker</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
+
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #1b1f38, #344767);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    user-select: none;
+    overflow: hidden;
+  }
+
+  #game {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 22px;
+    padding: 40px 50px 60px;
+    box-shadow: 0 0 80px rgba(255, 255, 255, 0.25);
+    text-align: center;
+    width: 400px;
+    position: relative;
+    color: #d6d8e7;
+    flex-shrink: 0;
+  }
+
+  h1 {
+    color: #d6d8e7;
+    margin-bottom: 22px;
+    font-weight: 700;
+    letter-spacing: 2.3px;
+  }
+
+  #clickBtn {
+    background: linear-gradient(145deg, #d32f2f, #f44336);
+    border: none;
+    color: white;
+    font-size: 2.8rem;
+    padding: 50px 0;
+    width: 100%;
+    border-radius: 28px;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(244, 67, 54, 0.8);
+    transition: transform 0.15s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #clickBtn:active {
+    transform: scale(0.93);
+    box-shadow: 0 4px 12px rgba(244, 67, 54, 1);
+  }
+
+  #score {
+    margin: 22px 0 12px;
+    font-size: 3.6rem;
+    color: #ffebee;
+    letter-spacing: 1.5px;
+    text-shadow: 0 0 14px #f44336;
+  }
+
+  #multiplier, #streak, #status {
+    font-size: 1.3rem;
+    margin-bottom: 12px;
+    color: #f8bbd0;
+  }
+
+  .powerup-container {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  button.powerUpBtn {
+    background: linear-gradient(145deg, #7b1fa2, #9c27b0);
+    border: none;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 14px 24px;
+    border-radius: 20px;
+    cursor: pointer;
+    box-shadow: 0 6px 15px rgba(156, 39, 176, 0.7);
+    transition: background 0.3s ease, transform 0.15s ease;
+    user-select: none;
+  }
+
+  button.powerUpBtn:disabled {
+    background: rgba(156, 39, 176, 0.25);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  button.powerUpBtn:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  /* Particle styles */
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 1;
+    animation: particle-fade 700ms forwards ease-out;
+  }
+
+  @keyframes particle-fade {
+    to {
+      opacity: 0;
+      transform: translateY(-40px) scale(0);
+    }
+  }
+
+  #autoclickerBtn {
+    margin-top: 18px;
+    background: linear-gradient(145deg, #1de9b6, #00bfa5);
+    border: none;
+    color: white;
+    font-weight: 700;
+    font-size: 1.3rem;
+    padding: 14px 30px;
+    border-radius: 24px;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(0, 191, 165, 0.9);
+    user-select: none;
+    display: none;
+  }
+
+  #autoclickerBtn.active {
+    background: linear-gradient(145deg, #00bfa5, #1de9b6);
+    box-shadow: 0 10px 30px rgba(29, 233, 182, 1);
+  }
+
+  /* Side panel styles */
+  #sidePanel {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(29, 29, 51, 0.9);
+    border-radius: 20px;
+    padding: 20px 24px;
+    box-shadow: 0 0 30px rgba(0, 255, 200, 0.7);
+    width: 280px;
+    color: #a3f7df;
+    font-weight: 600;
+    user-select: none;
+  }
+
+  #sidePanel label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 1.2rem;
+  }
+
+  #passwordInput {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: none;
+    font-size: 1.1rem;
+    outline: none;
+    color: #333;
+    font-weight: 600;
+  }
+
+  #submitPassword {
+    margin-top: 12px;
+    width: 100%;
+    background: linear-gradient(145deg, #00bfa5, #1de9b6);
+    border: none;
+    color: white;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 12px 0;
+    border-radius: 16px;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(0, 191, 165, 0.9);
+    transition: background 0.3s ease;
+  }
+
+  #submitPassword:hover {
+    background: linear-gradient(145deg, #1de9b6, #00bfa5);
+  }
+
+  #passwordMessage {
+    margin-top: 10px;
+    height: 22px;
+    font-size: 1rem;
+    color: #a3f7df;
+  }
+
+  /* Layout for main + side panel */
+  #container {
+    display: flex;
+    gap: 24px;
+  }
+</style>
+</head>
+<body>
+
+<div id="container">
+  <div id="game">
+    <h1>Hardcore Clicker Challenge</h1>
+    <div id="multiplier">Multiplier: x1.00</div>
+    <div id="streak">Streak Bonus: +0.00</div>
+    <div id="status">Status: Normal</div>
+    <button id="clickBtn" aria-label="Click me button">🔥 Click me!</button>
+    <div id="score">0</div>
+
+    <div class="powerup-container">
+      <button id="powerUp1" class="powerUpBtn" disabled>Power Up 1: +30% Multiplier<br>(Cost: 100)</button>
+      <button id="powerUp2" class="powerUpBtn" disabled>Power Up 2: Increase Max Streak Cap by 0.3<br>(Cost: 250)</button>
+      <button id="powerUp3" class="powerUpBtn" disabled>Power Up 3: Decrease Misclick Chance by 1%<br>(Cost: 400)</button>
+    </div>
+
+    <button id="autoclickerBtn" aria-label="Toggle Autoclicker">Enable Autoclicker</button>
+  </div>
+
+  <div id="sidePanel" aria-label="Password panel">
+    <label for="passwordInput">Enter Password for Special Features</label>
+    <input type="password" id="passwordInput" placeholder="Type password here..." aria-describedby="passwordMessage" />
+    <button id="submitPassword">Submit</button>
+    <div id="passwordMessage" role="alert" aria-live="polite"></div>
+  </div>
+</div>
+
+<script>
+  // Game state
+  let score = 0;
+  let multiplier = 1.0;
+  let streak = 0;
+  let streakBonus = 0;
+  let maxStreakCap = 3.0;
+  let misclickChance = 0.08; // 8% misclick chance
+  let isSpecialUnlocked = false;
+  let autoclickerActive = false;
+  let autoClickerInterval = null;
+
+  // Elements
+  const clickBtn = document.getElementById('clickBtn');
+  const scoreDisplay = document.getElementById('score');
+  const multiplierDisplay = document.getElementById('multiplier');
+  const streakDisplay = document.getElementById('streak');
+  const statusDisplay = document.getElementById('status');
+  const powerUp1Btn = document.getElementById('powerUp1');
+  const powerUp2Btn = document.getElementById('powerUp2');
+  const powerUp3Btn = document.getElementById('powerUp3');
+  const autoclickerBtn = document.getElementById('autoclickerBtn');
+  const passwordInput = document.getElementById('passwordInput');
+  const submitPasswordBtn = document.getElementById('submitPassword');
+  const passwordMessage = document.getElementById('passwordMessage');
+
+  // Passwords to unlock special features
+  const SECRET_PASSWORDS = ['IArgeeThatICannotBeatThisGame', 'pass'];
+
+  // Update UI
+  function updateUI() {
+    scoreDisplay.textContent = score.toFixed(2);
+    multiplierDisplay.textContent = `Multiplier: x${multiplier.toFixed(2)}`;
+    streakDisplay.textContent = `Streak Bonus: +${streakBonus.toFixed(2)}`;
+    // Enable powerups based on score
+    powerUp1Btn.disabled = score < 100;
+    powerUp2Btn.disabled = score < 250;
+    powerUp3Btn.disabled = score < 400;
+  }
+
+  // Particle effect for clicks
+  function createParticle(x, y, color) {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
+    particle.style.background = color;
+    const size = Math.random() * 12 + 10 + 'px';
+    particle.style.width = size;
+    particle.style.height = size;
+    particle.style.left = x + 'px';
+    particle.style.top = y + 'px';
+    document.body.appendChild(particle);
+
+    setTimeout(() => {
+      particle.remove();
+    }, 700);
+  }
+
+  // Handle clicks
+  function handleClick(event) {
+    if (Math.random() < misclickChance) {
+      // Misclick penalty resets streak and multiplier
+      streak = 0;
+      streakBonus = 0;
+      multiplier = 1.0;
+      statusDisplay.textContent = 'Status: Misclick! Multiplier Reset.';
+      statusDisplay.style.color = '#e57373';
+      createParticle(event.clientX, event.clientY, '#ff1744');
+    } else {
+      // Normal click
+      streak += 1;
+      if (streak > maxStreakCap) streak = maxStreakCap;
+
+      // Calculate streak bonus with diminishing returns
+      streakBonus = Math.pow(streak / maxStreakCap, 1.7);
+      multiplier = 1 + 0.3 + streakBonus * 0.7; // Base 1.3 + streak bonus portion
+
+      const pointsGained = 1 * multiplier;
+      score += pointsGained;
+
+      statusDisplay.textContent = `Status: +${pointsGained.toFixed(2)} Points!`;
+      statusDisplay.style.color = '#a5d6a7';
+      createParticle(event.clientX, event.clientY, '#81c784');
+    }
+
+    updateUI();
+  }
+
+  clickBtn.addEventListener('click', handleClick);
+
+  // Powerup 1: +30% multiplier (multiplicative)
+  powerUp1Btn.addEventListener('click', () => {
+    if (score >= 100) {
+      score -= 100;
+      multiplier *= 1.3;
+      statusDisplay.textContent = 'Power Up 1 Activated! Multiplier increased by 30%.';
+      statusDisplay.style.color = '#f48fb1';
+      updateUI();
+    }
+  });
+
+  // Powerup 2: Increase max streak cap by 0.3
+  powerUp2Btn.addEventListener('click', () => {
+    if (score >= 250) {
+      score -= 250;
+      maxStreakCap += 0.3;
+      statusDisplay.textContent = 'Power Up 2 Activated! Max streak cap increased.';
+      statusDisplay.style.color = '#ba68c8';
+      updateUI();
+    }
+  });
+
+  // Powerup 3: Decrease misclick chance by 1%
+  powerUp3Btn.addEventListener('click', () => {
+    if (score >= 400) {
+      score -= 400;
+      misclickChance = Math.max(0, misclickChance - 0.01);
+      statusDisplay.textContent = 'Power Up 3 Activated! Misclick chance decreased by 1%.';
+      statusDisplay.style.color = '#4db6ac';
+      updateUI();
+    }
+  });
+
+  // Autoclicker (special feature)
+  function startAutoClicker() {
+    if (autoClickerInterval) return;
+    autoClickerInterval = setInterval(() => {
+      handleClick({ clientX: clickBtn.getBoundingClientRect().left + 10, clientY: clickBtn.getBoundingClientRect().top + 10 });
+    }, 30); // 33 clicks per second ~ ultra fast
+    autoclickerBtn.textContent = 'Disable Autoclicker';
+    autoclickerBtn.classList.add('active');
+    autoclickerActive = true;
+  }
+
+  function stopAutoClicker() {
+    if (autoClickerInterval) {
+      clearInterval(autoClickerInterval);
+      autoClickerInterval = null;
+      autoclickerBtn.textContent = 'Enable Autoclicker';
+      autoclickerBtn.classList.remove('active');
+      autoclickerActive = false;
+    }
+  }
+
+  autoclickerBtn.addEventListener('click', () => {
+    if (!isSpecialUnlocked) return;
+    if (autoclickerActive) {
+      stopAutoClicker();
+    } else {
+      startAutoClicker();
+    }
+  });
+
+  // Password submit handler
+  submitPasswordBtn.addEventListener('click', () => {
+    const input = passwordInput.value.trim();
+    if (SECRET_PASSWORDS.includes(input)) {
+      isSpecialUnlocked = true;
+      passwordMessage.textContent = 'Password accepted! Special features unlocked.';
+      passwordMessage.style.color = '#00e676';
+      autoclickerBtn.style.display = 'inline-block';
+      passwordInput.value = '';
+    } else {
+      isSpecialUnlocked = false;
+      passwordMessage.textContent = 'Wrong password. Try again.';
+      passwordMessage.style.color = '#ff3d00';
+      autoclickerBtn.style.display = 'none';
+      if (autoClickerInterval) {
+        stopAutoClicker();
+      }
+    }
+  });
+
+  // Initial UI update
+  updateUI();
+</script>
+
+</body>
+</html>
