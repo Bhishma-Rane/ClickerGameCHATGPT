@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Hardcore Clicker Challenge + Ultra Fast Autoclicker</title>
+<title>Hardcore Clicker Challenge + Secret Autoclicker</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600&display=swap');
 
@@ -19,7 +19,6 @@
     align-items: center;
     height: 100vh;
     user-select: none;
-    overflow: hidden;
   }
 
   #game {
@@ -31,7 +30,6 @@
     width: 400px;
     position: relative;
     color: #d6d8e7;
-    flex-shrink: 0;
   }
 
   h1 {
@@ -141,275 +139,256 @@
     background: linear-gradient(145deg, #00bfa5, #1de9b6);
     box-shadow: 0 10px 30px rgba(29, 233, 182, 1);
   }
-
-  /* Side panel styles */
-  #sidePanel {
-    position: fixed;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(29, 29, 51, 0.9);
-    border-radius: 20px;
-    padding: 20px 24px;
-    box-shadow: 0 0 30px rgba(0, 255, 200, 0.7);
-    width: 280px;
-    color: #a3f7df;
-    font-weight: 600;
-    user-select: none;
-  }
-
-  #sidePanel label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 1.2rem;
-  }
-
-  #passwordInput {
-    width: 100%;
-    padding: 12px 16px;
-    border-radius: 14px;
-    border: none;
-    font-size: 1.1rem;
-    outline: none;
-    color: #333;
-    font-weight: 600;
-  }
-
-  #submitPassword {
-    margin-top: 12px;
-    width: 100%;
-    background: linear-gradient(145deg, #00bfa5, #1de9b6);
-    border: none;
-    color: white;
-    font-weight: 700;
-    font-size: 1.2rem;
-    padding: 12px 0;
-    border-radius: 16px;
-    cursor: pointer;
-    box-shadow: 0 8px 25px rgba(0, 191, 165, 0.9);
-    transition: background 0.3s ease;
-  }
-
-  #submitPassword:hover {
-    background: linear-gradient(145deg, #1de9b6, #00bfa5);
-  }
-
-  #passwordMessage {
-    margin-top: 10px;
-    height: 22px;
-    font-size: 1rem;
-    color: #a3f7df;
-  }
-
-  /* Layout for main + side panel */
-  #container {
-    display: flex;
-    gap: 24px;
-  }
 </style>
 </head>
 <body>
 
-<div id="container">
-  <div id="game">
-    <h1>Hardcore Clicker Challenge</h1>
-    <div id="multiplier">Multiplier: x1.00</div>
-    <div id="streak">Streak Bonus: +0.00</div>
-    <div id="status">Status: Normal</div>
-    <button id="clickBtn" aria-label="Click me button">🔥 Click me!</button>
-    <div id="score">0</div>
+<div id="game">
+  <h1>Hardcore Clicker Challenge</h1>
+  <div id="multiplier">Multiplier: x1.00</div>
+  <div id="streak">Streak Bonus: +0.00</div>
+  <div id="status">Status: Normal</div>
+  <button id="clickBtn" aria-label="Click me button">🔥 Click me!</button>
+  <div id="score">0</div>
 
-    <div class="powerup-container">
-      <button id="powerUp1" class="powerUpBtn" disabled>Power Up 1: +30% Multiplier<br>(Cost: 100)</button>
-      <button id="powerUp2" class="powerUpBtn" disabled>Power Up 2: Increase Max Streak Cap by 0.3<br>(Cost: 250)</button>
-      <button id="powerUp3" class="powerUpBtn" disabled>Power Up 3: Decrease Misclick Chance by 1%<br>(Cost: 400)</button>
-    </div>
-
-    <button id="autoclickerBtn" aria-label="Toggle Autoclicker">Enable Autoclicker</button>
+  <div class="powerup-container">
+    <button id="powerUp1" class="powerUpBtn" disabled>Power Up 1: +30% Multiplier<br>(Cost: 100)</button>
+    <button id="powerUp2" class="powerUpBtn" disabled>Power Up 2: Increase Max Streak Cap by 0.3<br>(Cost: 250)</button>
+    <button id="powerUp3" class="powerUpBtn" disabled>Power Up 3: Decrease Misclick Chance by 1%<br>(Cost: 400)</button>
   </div>
 
-  <div id="sidePanel" aria-label="Password panel">
-    <label for="passwordInput">Enter Password for Special Features</label>
-    <input type="password" id="passwordInput" placeholder="Type password here..." aria-describedby="passwordMessage" />
-    <button id="submitPassword">Submit</button>
-    <div id="passwordMessage" role="alert" aria-live="polite"></div>
-  </div>
+  <button id="autoclickerBtn" aria-label="Toggle Autoclicker">Enable Autoclicker</button>
 </div>
 
 <script>
-  // Game state
-  let score = 0;
-  let multiplier = 1.0;
-  let streak = 0;
-  let streakBonus = 0;
-  let maxStreakCap = 3.0;
-  let misclickChance = 0.08; // 8% misclick chance
-  let isSpecialUnlocked = false;
-  let autoclickerActive = false;
-  let autoClickerInterval = null;
-
-  // Elements
   const clickBtn = document.getElementById('clickBtn');
   const scoreDisplay = document.getElementById('score');
   const multiplierDisplay = document.getElementById('multiplier');
   const streakDisplay = document.getElementById('streak');
   const statusDisplay = document.getElementById('status');
+
   const powerUp1Btn = document.getElementById('powerUp1');
   const powerUp2Btn = document.getElementById('powerUp2');
   const powerUp3Btn = document.getElementById('powerUp3');
+
   const autoclickerBtn = document.getElementById('autoclickerBtn');
-  const passwordInput = document.getElementById('passwordInput');
-  const submitPasswordBtn = document.getElementById('submitPassword');
-  const passwordMessage = document.getElementById('passwordMessage');
 
-  // Passwords to unlock special features
-  const SECRET_PASSWORDS = ['IArgeeThatICannotBeatThisGame', 'pass'];
+  let score = 0;
+  let multiplier = 1.0;
+  let powerUp1Cost = 100;
+  let powerUp2Cost = 250;
+  let powerUp3Cost = 400;
 
-  // Update UI
-  function updateUI() {
-    scoreDisplay.textContent = score.toFixed(2);
-    multiplierDisplay.textContent = `Multiplier: x${multiplier.toFixed(2)}`;
-    streakDisplay.textContent = `Streak Bonus: +${streakBonus.toFixed(2)}`;
-    // Enable powerups based on score
-    powerUp1Btn.disabled = score < 100;
-    powerUp2Btn.disabled = score < 250;
-    powerUp3Btn.disabled = score < 400;
+  let streakCount = 0;
+  let streakCap = 1.0;
+  let misclickChance = 5; // percent
+  let misclickChanceReduction = 0; // reduced by power ups, min 0%
+
+  // To measure time between clicks
+  let lastClickTimestamp = 0;
+
+  // Autoclicker
+  let autoclickerActive = false;
+  let autoclickerInterval;
+
+  // Fatigue mechanic: If clicks are too fast, score per click drops
+  function calculateClickValue(deltaTime) {
+    if (autoclickerActive) return 1; // No fatigue when autoclicker is ON
+    if (deltaTime < 80) {
+      return 0; // Too fast, no points gained (fatigue)
+    } else if (deltaTime < 200) {
+      // Partial fatigue, linear scale
+      return 0.2 + 0.8 * ((deltaTime - 80) / 120);
+    }
+    return 1; // full value
   }
 
-  // Particle effect for clicks
-  function createParticle(x, y, color) {
+  function createParticle(x, y) {
     const particle = document.createElement('div');
     particle.classList.add('particle');
-    particle.style.background = color;
-    const size = Math.random() * 12 + 10 + 'px';
-    particle.style.width = size;
-    particle.style.height = size;
+
+    const size = Math.random() * 8 + 5;
+    particle.style.width = size + 'px';
+    particle.style.height = size + 'px';
+
+    const colors = ['#f48fb1', '#d81b60', '#ce93d8', '#ba68c8', '#f06292'];
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    particle.style.backgroundColor = color;
+
     particle.style.left = x + 'px';
     particle.style.top = y + 'px';
-    document.body.appendChild(particle);
+
+    document.getElementById('game').appendChild(particle);
+
+    particle.animate([
+      { transform: 'translateY(0) scale(1)', opacity: 1 },
+      { transform: `translateY(-40px) scale(0)`, opacity: 0 }
+    ], {
+      duration: 700,
+      easing: 'ease-out'
+    });
 
     setTimeout(() => {
       particle.remove();
     }, 700);
   }
 
-  // Handle clicks
-  function handleClick(event) {
-    if (Math.random() < misclickChance) {
-      // Misclick penalty resets streak and multiplier
-      streak = 0;
-      streakBonus = 0;
-      multiplier = 1.0;
-      statusDisplay.textContent = 'Status: Misclick! Multiplier Reset.';
-      statusDisplay.style.color = '#e57373';
-      createParticle(event.clientX, event.clientY, '#ff1744');
-    } else {
-      // Normal click
-      streak += 1;
-      if (streak > maxStreakCap) streak = maxStreakCap;
+  function updateScoreDisplay() {
+    scoreDisplay.textContent = Math.floor(score);
+    multiplierDisplay.textContent = `Multiplier: x${multiplier.toFixed(2)}`;
 
-      // Calculate streak bonus with diminishing returns
-      streakBonus = Math.pow(streak / maxStreakCap, 1.7);
-      multiplier = 1 + 0.3 + streakBonus * 0.7; // Base 1.3 + streak bonus portion
+    const streakBonus = Math.min(streakCount * 0.04, streakCap);
+    streakDisplay.textContent = `Streak Bonus: +${streakBonus.toFixed(2)}`;
 
-      const pointsGained = 1 * multiplier;
-      score += pointsGained;
-
-      statusDisplay.textContent = `Status: +${pointsGained.toFixed(2)} Points!`;
-      statusDisplay.style.color = '#a5d6a7';
-      createParticle(event.clientX, event.clientY, '#81c784');
-    }
-
-    updateUI();
+    powerUp1Btn.disabled = score < powerUp1Cost;
+    powerUp2Btn.disabled = score < powerUp2Cost;
+    powerUp3Btn.disabled = score < powerUp3Cost;
   }
 
-  clickBtn.addEventListener('click', handleClick);
-
-  // Powerup 1: +30% multiplier (multiplicative)
-  powerUp1Btn.addEventListener('click', () => {
-    if (score >= 100) {
-      score -= 100;
-      multiplier *= 1.3;
-      statusDisplay.textContent = 'Power Up 1 Activated! Multiplier increased by 30%.';
-      statusDisplay.style.color = '#f48fb1';
-      updateUI();
-    }
-  });
-
-  // Powerup 2: Increase max streak cap by 0.3
-  powerUp2Btn.addEventListener('click', () => {
-    if (score >= 250) {
-      score -= 250;
-      maxStreakCap += 0.3;
-      statusDisplay.textContent = 'Power Up 2 Activated! Max streak cap increased.';
-      statusDisplay.style.color = '#ba68c8';
-      updateUI();
-    }
-  });
-
-  // Powerup 3: Decrease misclick chance by 1%
-  powerUp3Btn.addEventListener('click', () => {
-    if (score >= 400) {
-      score -= 400;
-      misclickChance = Math.max(0, misclickChance - 0.01);
-      statusDisplay.textContent = 'Power Up 3 Activated! Misclick chance decreased by 1%.';
-      statusDisplay.style.color = '#4db6ac';
-      updateUI();
-    }
-  });
-
-  // Autoclicker (special feature)
-  function startAutoClicker() {
-    if (autoClickerInterval) return;
-    autoClickerInterval = setInterval(() => {
-      handleClick({ clientX: clickBtn.getBoundingClientRect().left + 10, clientY: clickBtn.getBoundingClientRect().top + 10 });
-    }, 30); // 33 clicks per second ~ ultra fast
-    autoclickerBtn.textContent = 'Disable Autoclicker';
-    autoclickerBtn.classList.add('active');
-    autoclickerActive = true;
+  function resetStreak(reason) {
+    if (autoclickerActive) return; // no resets in autoclicker mode
+    streakCount = 0;
+    statusDisplay.textContent = `Status: ${reason}`;
+    updateScoreDisplay();
+    setTimeout(() => {
+      statusDisplay.textContent = 'Status: Normal';
+    }, 1200);
   }
 
-  function stopAutoClicker() {
-    if (autoClickerInterval) {
-      clearInterval(autoClickerInterval);
-      autoClickerInterval = null;
-      autoclickerBtn.textContent = 'Enable Autoclicker';
-      autoclickerBtn.classList.remove('active');
-      autoclickerActive = false;
-    }
-  }
+  clickBtn.addEventListener('click', (e) => {
+    const now = performance.now();
+    let deltaTime = now - lastClickTimestamp;
+    lastClickTimestamp = now;
 
-  autoclickerBtn.addEventListener('click', () => {
-    if (!isSpecialUnlocked) return;
-    if (autoclickerActive) {
-      stopAutoClicker();
-    } else {
-      startAutoClicker();
-    }
-  });
+    if (!autoclickerActive) {
+      // Calculate fatigue factor based on speed between clicks
+      let fatigueFactor = calculateClickValue(deltaTime);
 
-  // Password submit handler
-  submitPasswordBtn.addEventListener('click', () => {
-    const input = passwordInput.value.trim();
-    if (SECRET_PASSWORDS.includes(input)) {
-      isSpecialUnlocked = true;
-      passwordMessage.textContent = 'Password accepted! Special features unlocked.';
-      passwordMessage.style.color = '#00e676';
-      autoclickerBtn.style.display = 'inline-block';
-      passwordInput.value = '';
+      if (fatigueFactor === 0) {
+        // Too fast, lose streak, no score
+        resetStreak('Too fast! Streak lost');
+        return;
+      }
+
+      // Combo decay if too slow (> 2s)
+      if (deltaTime > 2000) {
+        resetStreak('Too slow! Streak lost');
+      }
+
+      streakCount++;
+
+      // Calculate streak bonus capped by streakCap
+      let streakBonus = Math.min(streakCount * 0.04, streakCap);
+
+      // Misclick check
+      const effectiveMisclickChance = Math.max(misclickChance - misclickChanceReduction, 0);
+      if (Math.random() * 100 < effectiveMisclickChance) {
+        // Misclick: lose points and streak resets
+        const penalty = Math.min(score, 20 + Math.floor(streakCount * 2));
+        score -= penalty;
+        resetStreak('Misclick! Lost points');
+        updateScoreDisplay();
+        return;
+      }
+
+      // Calculate points gained
+      const points = fatigueFactor * (multiplier + streakBonus);
+      score += points;
+
     } else {
-      isSpecialUnlocked = false;
-      passwordMessage.textContent = 'Wrong password. Try again.';
-      passwordMessage.style.color = '#ff3d00';
-      autoclickerBtn.style.display = 'none';
-      if (autoClickerInterval) {
-        stopAutoClicker();
+      // Autoclicker mode: NO restrictions, max points every click
+      streakCount++;
+      const streakBonus = Math.min(streakCount * 0.04, streakCap);
+      const points = (multiplier + streakBonus);
+      score += points;
+      statusDisplay.textContent = 'Status: AUTCLICKER MODE';
+    }
+
+    updateScoreDisplay();
+
+    // Animate button and particles
+    clickBtn.style.transform = 'scale(0.93)';
+    setTimeout(() => {
+      clickBtn.style.transform = 'scale(1)';
+    }, 120);
+
+    if (!autoclickerActive) {
+      const rect = clickBtn.getBoundingClientRect();
+      const offsetX = e.clientX - rect.left;
+      const offsetY = e.clientY - rect.top;
+      for (let i = 0; i < 6; i++) {
+        const x = offsetX + (Math.random() * 30 - 15);
+        const y = offsetY + (Math.random() * 30 - 15);
+        createParticle(x, y);
       }
     }
   });
 
-  // Initial UI update
-  updateUI();
+  powerUp1Btn.addEventListener('click', () => {
+    if (score >= powerUp1Cost) {
+      score -= powerUp1Cost;
+      multiplier *= 1.3;
+      powerUp1Cost = Math.floor(powerUp1Cost * 2.7);
+      powerUp1Btn.textContent = `Power Up 1: +30% Multiplier<br>(Cost: ${powerUp1Cost})`;
+      resetStreak('Power Up Bought!');
+      updateScoreDisplay();
+    }
+  });
+
+  powerUp2Btn.addEventListener('click', () => {
+    if (score >= powerUp2Cost) {
+      score -= powerUp2Cost;
+      streakCap += 0.3;
+      powerUp2Cost = Math.floor(powerUp2Cost * 3);
+      powerUp2Btn.textContent = `Power Up 2: Increase Max Streak Cap by 0.3<br>(Cost: ${powerUp2Cost})`;
+      resetStreak('Power Up Bought!');
+      updateScoreDisplay();
+    }
+  });
+
+  powerUp3Btn.addEventListener('click', () => {
+    if (score >= powerUp3Cost) {
+      score -= powerUp3Cost;
+      misclickChanceReduction += 1;
+      powerUp3Cost = Math.floor(powerUp3Cost * 3.2);
+      powerUp3Btn.textContent = `Power Up 3: Decrease Misclick Chance by 1%<br>(Cost: ${powerUp3Cost})`;
+      resetStreak('Power Up Bought!');
+      updateScoreDisplay();
+    }
+  });
+
+  autoclickerBtn.addEventListener('click', () => {
+    autoclickerActive = !autoclickerActive;
+    autoclickerBtn.classList.toggle('active', autoclickerActive);
+    autoclickerBtn.textContent = autoclickerActive ? 'Disable Autoclicker' : 'Enable Autoclicker';
+
+    if (autoclickerActive) {
+      // Start rapid auto-click every 50ms
+      autoclickerInterval = setInterval(() => {
+        clickBtn.click();
+      }, 50);
+    } else {
+      clearInterval(autoclickerInterval);
+      statusDisplay.textContent = 'Status: Normal';
+    }
+  });
+
+  // Prompt for password on page load
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      const pass = prompt("Enter password for special feature:");
+      if (pass && pass.toLowerCase() === 'freedom') {
+        autoclickerBtn.style.display = 'inline-block';
+        alert('Special autoclicker enabled! Use the green button below to toggle it.');
+      }
+    }, 500);
+  });
+
+  powerUp1Btn.textContent = `Power Up 1: +30% Multiplier<br>(Cost: ${powerUp1Cost})`;
+  powerUp2Btn.textContent = `Power Up 2: Increase Max Streak Cap by 0.3<br>(Cost: ${powerUp2Cost})`;
+  powerUp3Btn.textContent = `Power Up 3: Decrease Misclick Chance by 1%<br>(Cost: ${powerUp3Cost})`;
+
+  updateScoreDisplay();
 </script>
 
 </body>
